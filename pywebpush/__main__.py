@@ -15,6 +15,7 @@ def get_config():
     parser.add_argument("--curl", help="Don't send, display as curl command",
                         default=False, action="store_true")
     parser.add_argument("--encoding", default="aesgcm")
+    parser.add_argument("--ck", help="Chrome VAPID raw private key")
 
     args = parser.parse_args()
 
@@ -31,11 +32,15 @@ def get_config():
         if args.head:
             with open(args.head) as r:
                 args.head = json.loads(r.read())
+        if args.ck:
+            with open(args.ck) as r:
+                args.ck = r.read()
         if args.claims:
-            if not args.key:
+            if not args.ck or args.key:
                 raise Exception("No private --key specified for claims")
             with open(args.claims) as r:
                 args.claims = json.loads(r.read())
+
     except Exception as ex:
         print("Couldn't read input {}.".format(ex))
         raise ex
@@ -50,7 +55,7 @@ def main():
         result = webpush(
             args.sub_info,
             data=args.data,
-            vapid_private_key=args.key,
+            vapid_private_key=args.ck or args.key,
             vapid_claims=args.claims,
             curl=args.curl,
             content_encoding=args.encoding)
