@@ -197,7 +197,7 @@ class WebPusher:
 
         """
         header_list = [
-            '--header "{}: {}" \\ \n'.format(
+            '-H "{}: {}" \\ \n'.format(
                 key.lower(), val) for key, val in headers.items()
         ]
         data = ""
@@ -349,7 +349,6 @@ def webpush(subscription_info,
         else:
             vv = Vapid.from_raw(private_raw=vapid_private_key.encode())
         vapid_headers = vv.sign(vapid_claims)
-    import pdb;pdb.set_trace()
     result = WebPusher(subscription_info).send(
         data,
         vapid_headers,
