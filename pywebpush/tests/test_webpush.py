@@ -295,3 +295,36 @@ class WebpushTestCase(unittest.TestCase):
         eq_(pdata["registration_ids"][0], "regid123")
         eq_(pheaders.get("authorization"), "key=gcm_key_value")
         eq_(pheaders.get("content-type"), "application/json")
+
+    @patch("requests.post")
+    def test_gcm_with_single_reg_id(self, mock_post):
+        subscription_info = self._gen_subscription_info(
+            None,
+            endpoint="https://android.googleapis.com/gcm/send/regid123")
+        headers = {"Crypto-Key": "pre-existing",
+                   "Authentication": "bearer vapid"}
+        data = "Mary had a little lamb"
+        wp = WebPusher(subscription_info)
+        wp.send(data, headers, reg_id = '12', gcm_key="gcm_key_value")
+        pdata = json.loads(mock_post.call_args[1].get('data'))
+        pheaders = mock_post.call_args[1].get('headers')
+        eq_(pdata["registration_ids"][0], "12")
+        eq_(pheaders.get("authorization"), "key=gcm_key_value")
+        eq_(pheaders.get("content-type"), "application/json")
+
+    @patch("requests.post")
+    def test_gcm_with_multiple_reg_id(self, mock_post):
+        subscription_info = self._gen_subscription_info(
+            None,
+            endpoint="https://android.googleapis.com/gcm/send/regid123")
+        headers = {"Crypto-Key": "pre-existing",
+                   "Authentication": "bearer vapid"}
+        data = "Mary had a little lamb"
+        wp = WebPusher(subscription_info)
+        wp.send(data, headers, reg_id = ['12', '34'], gcm_key="gcm_key_value")
+        pdata = json.loads(mock_post.call_args[1].get('data'))
+        pheaders = mock_post.call_args[1].get('headers')
+        eq_(pdata["registration_ids"][0], "12")
+        eq_(pdata["registration_ids"][1], "34")
+        eq_(pheaders.get("authorization"), "key=gcm_key_value")
+        eq_(pheaders.get("content-type"), "application/json")        

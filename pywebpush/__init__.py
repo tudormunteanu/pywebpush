@@ -264,7 +264,10 @@ class WebPusher:
             reg_ids = []
             if not reg_id:
                 reg_id = self.subscription_info['endpoint'].rsplit('/', 1)[-1]
-            reg_ids.append(reg_id)
+            if type(reg_id) is list:
+                reg_ids += reg_id
+            elif type(reg_id) is str:
+                reg_ids.append(reg_id)
             gcm_data = dict()
             gcm_data['registration_ids'] = reg_ids
             if data:
